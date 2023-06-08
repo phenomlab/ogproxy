@@ -21,7 +21,7 @@ const NodeCache = require('node-cache');
 const cache = new NodeCache();
 
 // Define your API key
-const apiKey = '3d9144c0858edd33e109dd4334ef1282d04342792749975c68960159c39c6973';
+const apiKey = 'YOUR_API_KEY_HERE';
 
 // Middleware to check API key
 const validateApiKey = (req, res, next) => {
