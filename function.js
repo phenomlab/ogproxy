@@ -1,8 +1,8 @@
 // Function to preview links
 function previewLinks() {
   $(document).ready(function() {
-    // Get all the links within the content class, excluding mentions plugin links
-    var links = $(".content a:not(.plugin-mentions-a)");
+    // Get all the links within the content class (posts) and chat, excluding mentions plugin links
+    var links = $(".content a:not(.plugin-mentions-a), [component=\"chat/message/body\"] a");
 
     // List of domains to ignore
     var ignoredDomains = [window.location.protocol + "//" + window.location.hostname];
@@ -25,6 +25,14 @@ function previewLinks() {
       function isFileUrl(url) {
         var fileExtensionPattern = /\.(png|jpeg|gif|pdf|docx?|xlsx?|pptx?|zip|rar|svg)$/i;
         return fileExtensionPattern.test(url);
+      }
+      
+      function isFullPath(url) {
+      // Regular expression to match a full path URL
+        var fullPathRegex = /^(?:[a-z]+:)?\/\//i;
+  
+      // Check if the URL matches the full path pattern
+        return fullPathRegex.test(url);
       }
 
       // Helper function to check if the domain should be ignored
@@ -49,8 +57,8 @@ function previewLinks() {
         console.log("OGProxy: Getting favicon for URL: " + url);
         var website = link.prop("hostname");
         var altSite = website.replace(/^www\./, "").replace(/\..+$/, "");
-        var proxy = "FULL_FQDN_TO_YOUR_PROXY_HERE";
-        var apiKey = "YOUR_API_KEY_HERE";
+        var proxy = "https://proxy.sudonix.org";
+        var apiKey = "3d9144c0858edd33e109dd4334ef1282d04342792749975c68960159c39c6973";
 
         // Send an AJAX request to the proxy server to fetch OpenGraph data for the URL
         $.ajax({
@@ -61,7 +69,6 @@ function previewLinks() {
           },
           success: function(data) {
             var result = data.result;
-
             // Extract relevant data from the OpenGraph result or use fallback values
             var altTitle = $(result).filter('meta[property="og:title"]').attr('content');
             var altDescription = $(result).filter('meta[property="og:description"]').attr('content');
@@ -73,10 +80,13 @@ function previewLinks() {
             var description = result.ogDescription || altDescription || tempDescription;
             var favicon = faviconApi || result.favicon || data.faviconUrl;
             var imageUrl = result.ogImage && result.ogImage[0].url || altImageUrl || tempImage;
+            // Some websites return a relative path for the image URL, which isn't much use, so we need to change this to full
+            var fullImagePath = host + imageUrl;
             var site = result.ogSiteName || altSite;
-
+            if(isFullPath(imageUrl) === false) {
+                imageUrl = fullImagePath;
+            }
             console.log("OGProxy: Getting data from " + url);
-
             // Create the HTML for the link preview card
             var cardHtml = '<a href="' + url + '">' +
               '<div class="card card-preview">' +
@@ -88,7 +98,6 @@ function previewLinks() {
               '</div>' +
               '</div>' +
               '</a>';
-
             // Replace the original link with the link preview card
             link.replaceWith(cardHtml);
           },
