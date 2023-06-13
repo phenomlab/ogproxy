@@ -12,7 +12,7 @@ const port = 2000;
 
 const apiKey = 'YOUR_API_KEY_HERE';
 
-app.use(cors({ origin: 'FUL_FQDN_OF_YOUR_ORIGIN_HERE' }));
+app.use(cors({ origin: 'FULL_FQDN_OF_YOUR_ORIGIN_HERE' }));
 
 app.get('/ogproxy', async (req, res) => {
   let { url } = req.query;
