@@ -1,73 +1,99 @@
 const express = require('express');
-const cheerio = require('cheerio');
-const axios = require('axios');
+const ogs = require('open-graph-scraper');
 const cors = require('cors');
-const morgan = require('morgan');
-const fs = require('fs');
-
+const { URL } = require('url');
+const cache = require('memory-cache');
+const axios = require('axios');
+const { MetaParser } = require('meta-parser');
+const cheerio = require('cheerio');
+const path = require('path');
 const app = express();
+const port = 2000;
 
-// Enable CORS
-app.use(cors());
-
-// Create a write stream for logging
-const accessLogStream = fs.createWriteStream('access.log', { flags: 'a' });
-
-// Use morgan middleware for logging
-app.use(morgan('combined', { stream: accessLogStream }));
-
-// Enable node-cache
-const NodeCache = require('node-cache');
-const cache = new NodeCache();
-
-// Define your API key
 const apiKey = 'YOUR_API_KEY_HERE';
 
-// Middleware to check API key
-const validateApiKey = (req, res, next) => {
-  const providedApiKey = req.headers['x-api-key'];
-
-  if (providedApiKey && providedApiKey === apiKey) {
-    next();
-  } else {
-    res.status(401).json({ error: 'Invalid API key.' });
-  }
-};
-
-// Apply the API key validation middleware to the /ogproxy route
-app.use('/ogproxy', validateApiKey);
+app.use(cors({ origin: 'FUL_FQDN_OF_YOUR_ORIGIN_HERE' }));
 
 app.get('/ogproxy', async (req, res) => {
-  const url = req.query.url;
+  let { url } = req.query;
+  const requestApiKey = req.headers['x-api-key'];
 
-  // Check if the data is available in the cache
-  const cachedData = cache.get(url);
-  if (cachedData) {
-    return res.json(cachedData);
+  if (requestApiKey !== apiKey) {
+    return res.status(401).send('Unauthorized');
   }
+
+  if (!url) {
+    return res.status(400).send('Missing URL parameter');
+  }
+  if (!url.startsWith('http')) {
+    url = new URL(url, `${req.protocol}://${req.get('host')}`).href;
+  }
+
+  const cachedResult = cache.get(url);
+  if (cachedResult) {
+    return res.json(cachedResult);
+  }
+
+  const options = { url };
 
   try {
-    const response = await axios.get(url);
-    const html = response.data;
-    const $ = cheerio.load(html);
+    const results = await ogs(options);
 
-    const metadata = {
-      title: $('meta[property="og:title"]').attr('content'),
-      description: $('meta[property="og:description"]').attr('content'),
-      image: $('meta[property="og:image"]').attr('content'),
-      url: $('meta[property="og:url"]').attr('content'),
-    };
+    if (results.data && results.data.ogImage && results.data.ogImage.url) {
+      const faviconUrl = new URL(results.data.ogImage.url, url).href;
+      results.data.faviconUrl = faviconUrl;
 
-    // Store the data in cache
-    cache.set(url, metadata);
+      // Fetch the website content
+      const websiteContent = await axios.get(url);
 
-    res.json(metadata);
+      // Create an instance of MetaParser and parse the website content
+      const parser = new MetaParser(url, websiteContent.data);
+      const metaProperties = parser.getMetaProperties();
+
+      const html = websiteContent.data;
+      const $ = cheerio.load(html);
+
+      const metadata = {
+        site: $('meta[property="og:site_name"]').attr('content') || '',
+        title: $('meta[property="og:title"]').attr('content') || '',
+        description: $('meta[property="og:description"]').attr('content') || '',
+        image: $('meta[property="og:image"]').attr('content') || '',
+        url: $('meta[property="og:url"]').attr('content') || '',
+        favicon: $('link[rel="icon"]').attr('href') || '',
+      };
+
+
+// Resolve the full URL for the favicon
+if (metadata.favicon && !metadata.favicon.startsWith('http')) {
+  const base = new URL(url);
+  const resolvedFaviconUrl = new URL(metadata.favicon, base).href;
+  metadata.favicon = resolvedFaviconUrl;
+}
+
+// Handle favicon request separately
+try {
+  if (metadata.favicon) {
+    const faviconResponse = await axios.get(metadata.favicon, { responseType: 'arraybuffer' });
+    const faviconData = faviconResponse.data.toString('base64');
+    metadata.favicon = `data:${faviconResponse.headers['content-type']};base64,${faviconData}`;
+  }
+} catch (faviconError) {
+  console.error('Failed to fetch favicon:', faviconError.message);
+}
+
+// Add the meta properties to the results
+results.data.metaProperties = metaProperties;
+
+// Update faviconUrl explicitly in results.data
+results.data.faviconUrl = metadata.favicon; // Use metadata.favicon instead of faviconUrl
+
+    }
+    cache.put(url, results);
+    res.json(results);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch OpenGraph metadata.' });
+    res.status(500).send('Error scraping Open Graph data');
   }
 });
-
-const port = 2000;
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });
