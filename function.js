@@ -109,3 +109,27 @@ function previewLinks() {
     });
   });
 }
+
+    $(window).on('action:ajaxify.end', function(data) {
+    $(document).ready(function() {
+    previewLinks()
+    });
+    });
+    
+    $(window).on('action:posts.loaded', function(data) {
+    $(document).ready(function() {
+    previewLinks()
+    });
+    });
+    
+    $(window).on('action:posts.edited', function(data) {
+    $(document).ready(function() {
+    previewLinks()
+    });
+    });
+    
+    $(window).on('action:chat.loaded', function(data) {
+    $(document).ready(function() {
+    previewLinks()
+    });
+    });
