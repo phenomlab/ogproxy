@@ -57,8 +57,8 @@ function previewLinks() {
         console.log("OGProxy: Getting favicon for URL: " + url);
         var website = link.prop("hostname");
         var altSite = website.replace(/^www\./, "").replace(/\..+$/, "");
-        var proxy = "https://proxy.sudonix.org";
-        var apiKey = "3d9144c0858edd33e109dd4334ef1282d04342792749975c68960159c39c6973";
+        var proxy = "FQDN_TO_YOUR_SITE_HERE";
+        var apiKey = "YOUR_API_KEY";
 
         // Send an AJAX request to the proxy server to fetch OpenGraph data for the URL
         $.ajax({
