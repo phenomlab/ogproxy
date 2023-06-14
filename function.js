@@ -67,7 +67,7 @@ function previewLinks() {
 
                 // Send an AJAX request to the proxy server to fetch OpenGraph data for the URL
                 $.ajax({
-                    url: proxy + "/ogproxy?url=" + url,
+                    url: proxy + "/ogproxy?url=" + encodeURIComponent(url),
                     method: "GET",
                     headers: {
                         'X-Api-Key': apiKey
@@ -91,7 +91,7 @@ function previewLinks() {
                         if (isFullPath(imageUrl) === false) {
                             imageUrl = fullImagePath;
                         }
-                        console.log("OGProxy: Getting data from " + url);
+                        console.log("OGProxy: Getting data from " + encodeURIComponent(url);
                         // Create the HTML for the link preview card
                         var cardHtml = '<a href="' + url + '">' +
                             '<div class="card card-preview">' +
