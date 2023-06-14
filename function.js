@@ -95,7 +95,9 @@ function previewLinks() {
                         // Create the HTML for the link preview card
                         var cardHtml = '<a href="' + url + '">' +
                             '<div class="card card-preview">' +
+                            '<div class="card-image-container">' +
                             '<div id="card-image"><img src="' + imageUrl + '"></div>' +
+                            '</div>' +
                             '<div class="card-body">' +
                             '<h4 id="sitetitle" class="card-site-title"><img id="favicon" class="card-favicon" src="' + favicon + '">' + site + '</h4>' +
                             '<h6 class="card-title">' + title + '</h6>' +
@@ -114,3 +116,33 @@ function previewLinks() {
         });
     });
 }
+
+$(window).on('action:ajaxify.end', function(data) {
+    $(document).ready(function() {
+        previewLinks()
+    });
+});
+
+$(window).on('action:posts.loaded', function(data) {
+    $(document).ready(function() {
+        previewLinks()
+    });
+});
+
+$(window).on('action:posts.edited', function(data) {
+    $(document).ready(function() {
+        previewLinks()
+    });
+});
+
+$(window).on('action:chat.loaded', function(data) {
+    $(document).ready(function() {
+        previewLinks()
+    });
+});
+
+$(window).on('action:chat.received', function(data) {
+    $(document).ready(function() {
+        previewLinks()
+    });
+});
