@@ -91,7 +91,7 @@ function previewLinks() {
                         if (isFullPath(imageUrl) === false) {
                             imageUrl = fullImagePath;
                         }
-                        console.log("OGProxy: Getting data from " + encodeURIComponent(url);
+                        console.log("OGProxy: Getting data from " + url);
                         // Create the HTML for the link preview card
                         var cardHtml = '<a href="' + url + '">' +
                             '<div class="card card-preview">' +
