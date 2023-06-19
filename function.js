@@ -101,7 +101,7 @@ function previewLinks() {
                             '<div class="card-body">' +
                             '<h4 id="sitetitle" class="card-site-title"><img id="favicon" class="card-favicon" src="' + favicon + '">' + site + '</h4>' +
                             '<h6 class="card-title">' + title + '</h6>' +
-                            '<p class="card-text">' + description + '</p>' +
+                            '<p class="card-text">' + truncateDescription(description, 150) + '</p>' +
                             '</div>' +
                             '</div>' +
                             '</a>';
@@ -115,6 +115,14 @@ function previewLinks() {
             }
         });
     });
+}
+
+// Helper function to truncate the description with ellipsis if it exceeds the specified limit
+function truncateDescription(description, limit) {
+    if (description.length > limit) {
+        return description.substring(0, limit) + '...';
+    }
+    return description;
 }
 
 $(window).on('action:ajaxify.end', function(data) {
