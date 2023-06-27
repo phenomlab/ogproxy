@@ -2,7 +2,7 @@
 function previewLinks() {
     $(document).ready(function() {
         // Get all the links within the content class (posts) and chat, excluding mentions plugin links
-        var links = $(".content a:not(.plugin-mentions-a), [component=\"chat/message/body\"] a");
+        var links = $(".content a:not(.plugin-mentions-a):not(.plugin-mentions-user), [component=\"chat/message/body\"] a, .preview-container a:not(.plugin-mentions-a):not(.plugin-mentions-user), .resolved-message a, .adhoc a");
 
         // List of domains to ignore
         var ignoredDomains = [window.location.protocol + "//" + window.location.hostname];
@@ -75,13 +75,14 @@ function previewLinks() {
                     success: function(data) {
                         var result = data.result;
                         // Extract relevant data from the OpenGraph result or use fallback values
+                        var rawTitle = $(data.html).filter('title').text();
                         var altTitle = $(result).filter('meta[property="og:title"]').attr('content');
                         var altDescription = $(result).filter('meta[property="og:description"]').attr('content');
                         var tempDescription = "This website did not return any description. It might be behind a login or paywall.";
                         var altImageUrl = $(result).filter('meta[property="og:image"]').attr('content');
-                        var tempImage = proxy + "/images/404.webp";
+                        var tempImage = proxy + "/images/404_3.webp";
                         var url = result.requestUrl || url;
-                        var title = result.ogTitle || altTitle;
+                        var title = rawTitle || result.ogTitle || altTitle;
                         var description = result.ogDescription || altDescription || tempDescription;
                         var favicon = faviconApi || result.favicon || data.faviconUrl;
                         var imageUrl = result.ogImage && result.ogImage[0].url || altImageUrl || tempImage;
@@ -125,6 +126,7 @@ function truncateDescription(description, limit) {
     return description;
 }
 
+
 $(window).on('action:ajaxify.end', function(data) {
     $(document).ready(function() {
         previewLinks()
@@ -150,6 +152,11 @@ $(window).on('action:chat.loaded', function(data) {
 });
 
 $(window).on('action:chat.received', function(data) {
+    $(document).ready(function() {
+        previewLinks()
+    });
+});
+$(window).on('action:composer.preview', function(data) {
     $(document).ready(function() {
         previewLinks()
     });
