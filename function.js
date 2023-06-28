@@ -92,6 +92,16 @@ function previewLinks() {
                         if (isFullPath(imageUrl) === false) {
                             imageUrl = fullImagePath;
                         }
+                        // Test to see if image is broken in the preview card. This might be the resul of hotlinking protection, so the image isn't
+                        // rendered as a result. If this is the case, we replace it with the tempImage so keep things looking nice.
+                        $(document).ready(function() {
+                            $('#card-image img').on('error', function() {
+                                // Image failed to load
+                                // Add your logic here to handle the broken image
+                                console.log("OGProxy: Original image " + imageUrl + " appears to be missing. Replacing with " + tempImage);
+                                $(this).attr('src', tempImage); // Replace with a placeholder image
+                            });
+                        });
                         console.log("OGProxy: Getting data from " + url);
                         // Create the HTML for the link preview card
                         var cardHtml = '<a href="' + url + '">' +
