@@ -113,7 +113,8 @@ function previewLinks() {
 							console.log("OGProxy: Getting image URL: " + imageUrl);
 						}
 						// Create the HTML for the link preview card
-						var cardHtml = '<a href="' + url + '">' +
+						var cardHtml = '<div class="card card-wrapper">' +
+						    '<a href="' + url + '">' +
 							'<div class="card card-preview">' +
 							'<div class="card-image-container">' +
 							'<div id="card-image"><img src="' + imageUrl + '"></div>' +
@@ -122,6 +123,7 @@ function previewLinks() {
 							'<h4 id="sitetitle" class="card-site-title"><img id="favicon" class="card-favicon" src="' + favicon + '">' + site + '</h4>' +
 							'<h6 class="card-title">' + title + '</h6>' +
 							'<p class="card-text">' + truncateDescription(description, 150) + '</p>' +
+							'</div>' +
 							'</div>' +
 							'</div>' +
 							'</a>';
