@@ -4,8 +4,7 @@ function previewLinks() {
 		// Set this flag to true to enable debug logging
 		var debug = false;
 		// Get all the links within the content class (posts) and chat, excluding mentions plugin links
-		var links = $(".content a:not(.plugin-mentions-a):not(.plugin-mentions-user), [component=\"chat/message/body\"] a, .preview-container a:not(.plugin-mentions-a):not(.plugin-mentions-user), .resolved-message a, .adhoc a");
-
+		var links = $(".content a:not(.plugin-mentions-a):not(.plugin-mentions-user), [component=\"chat/message/body\"] a:not(.plugin-mentions-a):not(.plugin-mentions-user), .preview-container a:not(.plugin-mentions-a):not(.plugin-mentions-user), .resolved-message a, .adhoc a");
 		// List of domains to ignore
 		var ignoredDomains = [window.location.protocol + "//" + window.location.hostname];
 
